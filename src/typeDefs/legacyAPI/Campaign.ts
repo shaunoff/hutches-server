@@ -96,26 +96,6 @@ const Campaign = gql`
     uuid: String
   }
 
-  type Invitations {
-    accepted_at: String
-    campaign_id: Int
-    communication_automation_id: String
-    communication_id: Int
-    created_at: String
-    created_by_id: Int
-    deleted_at: String
-    id: ID!
-    import_key: String
-    opted_out: Boolean
-    retailer_id: Int
-    state: String
-    status: String
-    updated_at: String
-    updated_by_id: Int
-    user_id: String
-    uuid: String
-  }
-
   type ShareSettingsCountPerShareType {
     channel: String
     count: Int
@@ -274,7 +254,7 @@ const Campaign = gql`
     ad_creative_templates: [AdCreativeTemplates]
     rewards: [String]
     invitation: [Invitation]
-    invitations: [Invitations]
+    invitations: [Invitation]
     bounties: [String]
     share_settings: [ShareSetting]
     assets: [Asset]

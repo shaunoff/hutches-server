@@ -18,6 +18,9 @@ const server = new ApolloServer({
       return {}
     }
   },
+  engine: {
+    apiKey: 'service:promoboxx:KIUABFJrdIzEVAi87HRcjw',
+  },
   tracing: true,
   debug: true,
 })
