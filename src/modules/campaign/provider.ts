@@ -1,12 +1,15 @@
 import { RESTDataSource, RequestOptions } from 'apollo-datasource-rest'
+import { Injectable, ProviderScope } from '@graphql-modules/di'
 import {
   CampaignSearchParams,
   CampaignsParams,
 } from '../../../generated/graphql'
 import formatQueryParams from '../../lib/formatQueryParams'
 
-//Campaigns
-class LegacyAPI extends RESTDataSource {
+@Injectable({
+  scope: ProviderScope.Session,
+})
+export class CampaignAPI extends RESTDataSource {
   constructor() {
     super()
     this.baseURL = 'https://api.dev.pbxx.io'
@@ -40,5 +43,3 @@ class LegacyAPI extends RESTDataSource {
     )
   }
 }
-
-export default LegacyAPI

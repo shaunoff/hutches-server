@@ -1,6 +1,56 @@
 import { gql } from 'apollo-server'
 
-const Campaign = gql`
+export const typeDefs = gql`
+  type Asset {
+    id: ID!
+    campaign_id: Int
+    created_at: String
+    updated_at: String
+    file_file_name: String
+    file_content_type: String
+    file_file_size: String
+    file_updated_at: String
+    category: String
+    brand_id: Int
+    name: String
+    description: String
+    created_by_id: Int
+    updated_by_id: Int
+    deleted_at: String
+    enabled: Boolean
+    width: String
+    height: String
+    thumbnail_url: String
+    medium_url: String
+    original_url: String
+    pinned: Boolean
+    file_extension: String
+    file_type: String
+    file_url: String
+    tag_list: [String]
+  }
+
+  type Brand {
+    id: ID!
+    name: String
+    logo_url: String
+    show_logo: Boolean
+    header_background_color: String
+    header_foreground_color: String
+    support_email_address: String
+    slug: String
+    external_auth_login_url: String
+    default_enrollment_campaign_id: Int
+    lock_retailer_data: Boolean
+    campaign_alias: String
+    retailer_alias: String
+    custom_header_css: String
+    website: String
+    auto_share_facebook: Boolean
+    auto_share_twitter: Boolean
+    lock_user_creation: Boolean
+  }
+
   type File {
     public_id: String
     resource_type: String
@@ -271,6 +321,55 @@ const Campaign = gql`
     configured_channels: [String]
     features: [String]
   }
-`
 
-export default Campaign
+  input CampaignsParams {
+    per_page: Int
+    offset: Int
+    fields: [String]
+  }
+
+  input CampaignSearchParams {
+    per_page: Int
+    offset: Int
+    search: String
+  }
+
+  type Query {
+    getCampaignSearch(
+      resourceType: String!
+      resourceId: String!
+      params: CampaignSearchParams
+    ): [Campaign]
+    getCampaigns(
+      resourceType: String!
+      resourceId: String!
+      params: CampaignsParams
+    ): [Campaign]
+  }
+
+  type DigitalAsset {
+    external_video_url: String
+    file: File
+  }
+
+  type ShareData {
+    post_format: String
+    subject: String
+    body: String
+    title: String
+    description: String
+    link: String
+    share_url_type: String
+    custom_share_url_id: String
+    button_text: String
+  }
+
+  type ShareSetting {
+    id: ID!
+    share_type: String
+    responsive_share_image_url: String
+    landing_page_copy: String
+    name: String
+    share_data: ShareData
+  }
+`

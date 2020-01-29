@@ -1,9 +1,12 @@
 import { RESTDataSource, RequestOptions } from 'apollo-datasource-rest'
+import { Injectable, ProviderScope } from '@graphql-modules/di'
 import { WalletsParams, AddFundsParams } from '../../../generated/graphql'
 import formatQueryParams from '../../lib/formatQueryParams'
 
-//Campaigns
-class WalletService extends RESTDataSource {
+@Injectable({
+  scope: ProviderScope.Session,
+})
+export class WalletService extends RESTDataSource {
   constructor() {
     super()
     this.baseURL = 'https://service.dev.pbxx.io'
@@ -27,5 +30,3 @@ class WalletService extends RESTDataSource {
     })
   }
 }
-
-export default WalletService
