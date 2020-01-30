@@ -1,8 +1,8 @@
-import { CampaignAPI } from './provider'
-import { QueryResolvers } from '../../../generated/graphql'
-import getParamsForFields from '../../lib/getParamsForFields'
+import { CampaignAPI } from '../providers'
+import { QueryResolvers } from '@models'
+import getParamsForFields from '@lib/getParamsForFields'
 
-const getCampaigns: QueryResolvers = {
+export const Query: QueryResolvers = {
   getCampaigns: (
     root,
     { resourceType, resourceId, params = {} },
@@ -14,9 +14,6 @@ const getCampaigns: QueryResolvers = {
       .get(CampaignAPI)
       .getCampaigns(resourceType, resourceId, params)
   },
-}
-
-const getCampaignSearch: QueryResolvers = {
   getCampaignSearch: (
     root,
     { resourceType, resourceId, params = {} },
@@ -27,9 +24,4 @@ const getCampaignSearch: QueryResolvers = {
       .get(CampaignAPI)
       .getCampaignSearch(resourceType, resourceId, params)
   },
-}
-
-export const Query = {
-  ...getCampaignSearch,
-  ...getCampaigns,
 }

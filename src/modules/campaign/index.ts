@@ -1,21 +1,26 @@
 import { GraphQLModule } from '@graphql-modules/core'
+import { loadResolversFiles, loadSchemaFiles } from 'graphql-toolkit'
 
 //Providers
-import { CampaignAPI } from './provider'
+import { CampaignAPI } from './providers'
+import { RemoteEndpoint } from '@lib/symbols'
 
-// TyeDefs
-import { typeDefs } from './typeDefs'
+export interface CampaignModuleConfig {
+  remoteEndpoint: string
+}
 
-//Resolvers
-import { Query } from './resolvers'
-
-export const CampaignModule = new GraphQLModule({
-  typeDefs: [typeDefs],
-  resolvers: {
-    Query,
-  },
-  providers: [CampaignAPI],
-  context: (session) => {
+export const CampaignModule = new GraphQLModule<CampaignModuleConfig>({
+  typeDefs: loadSchemaFiles(__dirname + '/schema/'),
+  resolvers: loadResolversFiles(__dirname + '/resolvers/'),
+  providers: ({ config: { remoteEndpoint } }) => [
+    CampaignAPI,
+    {
+      provide: RemoteEndpoint,
+      useValue: remoteEndpoint,
+    },
+    //Another provide/useValue object can be here...
+  ],
+  context: (session: any) => {
     // On each request, read the 'Authorization' header and store it in context
     // to be used by all resolvers.
     if (session?.req?.headers?.authorization) {
@@ -26,4 +31,5 @@ export const CampaignModule = new GraphQLModule({
       return {}
     }
   },
+  configRequired: true,
 })

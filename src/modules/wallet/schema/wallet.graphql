@@ -1,0 +1,39 @@
+type BrandWallet {
+  id: String
+  payment_methods: [PaymentMethod]
+}
+
+type PaymentMethod {
+  id: String
+  type: String
+  balance_cents: String
+}
+
+type Restriction {
+  key: String
+  value: String
+}
+
+type Ledger {
+  id: String
+  wallet_id: String
+  balance: String
+  restrictions: [Restriction]
+}
+
+type Wallet {
+  id: String
+  brand_id: String
+  business_id: String
+  balance: String
+  ledgers: [Ledger]
+}
+
+type Wallets {
+  wallets: [Wallet]
+}
+
+type AddFundsResponse {
+  deposit_id: String
+  transaction_id: String
+}

@@ -1,18 +1,16 @@
 import { RESTDataSource, RequestOptions } from 'apollo-datasource-rest'
-import { Injectable, ProviderScope } from '@graphql-modules/di'
-import {
-  CampaignSearchParams,
-  CampaignsParams,
-} from '../../../generated/graphql'
-import formatQueryParams from '../../lib/formatQueryParams'
+import { Injectable, ProviderScope, Inject } from '@graphql-modules/di'
+import { CampaignSearchParams, CampaignsParams } from '@models'
+import formatQueryParams from '@lib/formatQueryParams'
+import { RemoteEndpoint } from '@lib/symbols'
 
 @Injectable({
   scope: ProviderScope.Session,
 })
 export class CampaignAPI extends RESTDataSource {
-  constructor() {
+  constructor(@Inject(RemoteEndpoint) private remoteEndpoint: string) {
     super()
-    this.baseURL = 'https://api.dev.pbxx.io'
+    this.baseURL = this.remoteEndpoint
   }
 
   willSendRequest(request: RequestOptions) {

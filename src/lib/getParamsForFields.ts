@@ -1,4 +1,4 @@
-import { Maybe } from '../../generated/graphql'
+import { Maybe } from '@models'
 import {
   FieldNode,
   FragmentSpreadNode,
