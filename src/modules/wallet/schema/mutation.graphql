@@ -1,0 +1,10 @@
+input AddFundsParams {
+  brand_id: String!
+  source: String!
+  source_id: String!
+  amount_cents: String!
+}
+
+type Mutation {
+  addFunds(params: AddFundsParams): AddFundsResponse
+}

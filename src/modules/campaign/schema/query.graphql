@@ -1,0 +1,24 @@
+input CampaignsParams {
+  per_page: Int
+  offset: Int
+  fields: [String]
+}
+
+input CampaignSearchParams {
+  per_page: Int
+  offset: Int
+  search: String
+}
+
+type Query {
+  getCampaignSearch(
+    resourceType: String!
+    resourceId: String!
+    params: CampaignSearchParams
+  ): [Campaign]
+  getCampaigns(
+    resourceType: String!
+    resourceId: String!
+    params: CampaignsParams
+  ): [Campaign]
+}

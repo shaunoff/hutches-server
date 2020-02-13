@@ -1,5 +1,5 @@
 import queryString from 'query-string'
-import { Maybe } from '../../generated/graphql'
+import { Maybe } from '@models'
 
 type Params = {
   [key: string]: string | number | string[] | null | undefined | Maybe<string>[]

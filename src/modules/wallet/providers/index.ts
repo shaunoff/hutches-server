@@ -1,12 +1,16 @@
 import { RESTDataSource, RequestOptions } from 'apollo-datasource-rest'
-import { WalletsParams, AddFundsParams } from '../../../generated/graphql'
-import formatQueryParams from '../../lib/formatQueryParams'
+import { Inject, Injectable, ProviderScope } from '@graphql-modules/di'
+import { WalletsParams, AddFundsParams } from '@models'
+import formatQueryParams from '@lib/formatQueryParams'
+import { RemoteEndpoint } from '@lib/symbols'
 
-//Campaigns
-class WalletService extends RESTDataSource {
-  constructor() {
+@Injectable({
+  scope: ProviderScope.Session,
+})
+export class WalletService extends RESTDataSource {
+  constructor(@Inject(RemoteEndpoint) private remoteEndpoint: string) {
     super()
-    this.baseURL = 'https://service.dev.pbxx.io'
+    this.baseURL = this.remoteEndpoint
   }
 
   willSendRequest(request: RequestOptions) {
@@ -27,5 +31,3 @@ class WalletService extends RESTDataSource {
     })
   }
 }
-
-export default WalletService
