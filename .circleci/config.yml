@@ -88,14 +88,13 @@ jobs:
 
 workflows:
   version: 2
-  # deploy:
-  #   jobs:
-  #     - prepare:
-  #         context: spa
-  #         filters:
-  #           branches:
-  #             only: terraform
-  #             # only: master
+  deploy:
+    jobs:
+      - prepare:
+          context: spa
+          filters:
+            branches:
+              only: master
   #     - docker_build_and_push:
   #         context: 'dockerhub'
   #         requires:
