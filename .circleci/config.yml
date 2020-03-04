@@ -94,15 +94,16 @@ workflows:
           context: spa
           filters:
             branches:
-              only: master
-  #     - docker_build_and_push:
-  #         context: 'dockerhub'
-  #         requires:
-  #           - prepare
-  #         filters:
-  #           branches:
-  #             only: terraform
-  #             # only: master
+              only: terraform
+              # only: master
+      - docker_build_and_push:
+          context: 'dockerhub'
+          requires:
+            - prepare
+          filters:
+            branches:
+              only: terraform
+              # only: master
   # - deploy_dev:
   #     filters:
   #       branches:
