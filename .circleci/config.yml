@@ -94,16 +94,16 @@ workflows:
           context: spa
           filters:
             branches:
-              ignore: master
-              # only: master
+              only: master
+
+  testing:
+    jobs:
+      - prepare:
+          context: spa
       - docker_build_and_push:
           context: 'dockerhub'
           requires:
             - prepare
-          filters:
-            branches:
-              ignore: master
-              # only: master
   # - deploy_dev:
   #     filters:
   #       branches:
