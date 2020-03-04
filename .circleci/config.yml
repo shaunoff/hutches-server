@@ -1,0 +1,111 @@
+version: 2.1
+executors:
+  docker_git:
+    docker:
+      - image: docker:stable-git
+  ecs-deploy:
+    resource_class: small
+    docker:
+      - image: pbxx/go-ecs-deploy:master-latest
+        auth:
+          username: $DOCKER_LOGIN
+          password: $DOCKER_PASSWORD
+
+commands:
+  deploy:
+    parameters:
+      type:
+        type: enum
+        enum: ['service', 'oneshot']
+        default: 'service'
+      cluster:
+        type: enum
+        enum: ['dev', 'stg', 'prod']
+      role_arn:
+        type: string
+      config_repo:
+        type: string
+      config_dir:
+        type: string
+      task_file:
+        type: string
+        default: 'task.json'
+    steps:
+      - run: |
+          git clone git@github.com:promoboxx/<< parameters.config_repo >>.git
+          export AWS_REGION="us-east-1"
+          export AWS_DEFAULT_REGION="us-east-1"
+
+          jq --arg image "pbxx/${CIRCLE_PROJECT_REPONAME}:${CIRCLE_SHA1}" '.containerDefinitions[0].image = $image' ./<< parameters.config_repo >>/<< parameters.config_dir >>/<< parameters.task_file >> > temp_task.json
+          jq --arg token "$(date +%s)" '.clientToken = $token' ./<< parameters.config_repo >>/<< parameters.config_dir >>/service.json > temp_service.json
+
+          echo "------------------------------------------------------------------------------------------"
+          jq '.' temp_task.json
+          echo "------------------------------------------------------------------------------------------"
+          jq '.' temp_service.json
+          echo "------------------------------------------------------------------------------------------"
+
+          /go-ecs-deploy -task temp_task.json -service temp_service.json -type << parameters.type >> -cluster << parameters.cluster >> -roleArn << parameters.role_arn >> -roleSessionName circleci-<< parameters.cluster >>-deploy -roleExternalID ecs-<< parameters.cluster >>-deploy -count 120
+
+jobs:
+  prepare:
+    executor: docker_git
+    steps:
+      - checkout
+      - run:
+          name: Setup NPM registry authentication
+          command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > .npmrc
+      - persist_to_workspace:
+          root: /root
+          paths:
+            - .
+  docker_build_and_push:
+    executor: docker_git
+    steps:
+      - attach_workspace:
+          at: /root
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run: |
+          docker login -u "$DOCKER_LOGIN" -p "$DOCKER_PASSWORD"
+
+          docker build -t pbxx/${CIRCLE_PROJECT_REPONAME}:${CIRCLE_SHA1} .
+          docker tag pbxx/${CIRCLE_PROJECT_REPONAME}:${CIRCLE_SHA1} pbxx/${CIRCLE_PROJECT_REPONAME}:${CIRCLE_BRANCH}-latest
+
+          docker push pbxx/${CIRCLE_PROJECT_REPONAME}:${CIRCLE_SHA1}
+          docker push pbxx/${CIRCLE_PROJECT_REPONAME}:${CIRCLE_BRANCH}-latest
+  deploy_dev:
+    executor: ecs-deploy
+    steps:
+      - attach_workspace:
+          at: /root
+      - deploy:
+          cluster: dev
+          role_arn: ${DEV_ECS_DEPLOY_ROLE_ARN}
+          config_repo: deploy-config-dev
+          config_dir: graphql-server
+
+workflows:
+  version: 2
+
+  deploy:
+    jobs:
+      - prepare:
+          context: spa
+          filters:
+            branches:
+              only: master
+      - docker_build_and_push:
+          context: 'dockerhub'
+          requires:
+            - test
+          filters:
+            branches:
+              only: master
+      # - deploy_dev:
+      #     filters:
+      #       branches:
+      #         only: master
+      #     context: 'dockerhub'
+      #     requires:
+      #       - docker_build_and_push
