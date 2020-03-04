@@ -1,0 +1,8 @@
+version: '3.4'
+services:
+  graphql-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '4000:4000'
