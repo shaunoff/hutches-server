@@ -88,27 +88,26 @@ jobs:
 
 workflows:
   version: 2
-
-  deploy:
-    jobs:
-      - prepare:
-          context: spa
-          filters:
-            branches:
-              only: terraform
-              # only: master
-      - docker_build_and_push:
-          context: 'dockerhub'
-          requires:
-            - prepare
-          filters:
-            branches:
-              only: terraform
-              # only: master
-      # - deploy_dev:
-      #     filters:
-      #       branches:
-      #         only: master
-      #     context: 'dockerhub'
-      #     requires:
-      #       - docker_build_and_push
+  # deploy:
+  #   jobs:
+  #     - prepare:
+  #         context: spa
+  #         filters:
+  #           branches:
+  #             only: terraform
+  #             # only: master
+  #     - docker_build_and_push:
+  #         context: 'dockerhub'
+  #         requires:
+  #           - prepare
+  #         filters:
+  #           branches:
+  #             only: terraform
+  #             # only: master
+  # - deploy_dev:
+  #     filters:
+  #       branches:
+  #         only: master
+  #     context: 'dockerhub'
+  #     requires:
+  #       - docker_build_and_push
