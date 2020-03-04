@@ -96,6 +96,14 @@ workflows:
             branches:
               only: terraform-setup
               # only: master
+      - docker_build_and_push:
+          filters:
+            branches:
+              only: terraform-setup
+              # only: master
+          context: 'dockerhub'
+          requires:
+            - prepare
       - deploy_dev:
           filters:
             branches:
