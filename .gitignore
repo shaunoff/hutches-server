@@ -14,3 +14,4 @@ src/.DS_Store
 lambda-build
 .terraform
 terraform.tfstate.d
+.npmrc
