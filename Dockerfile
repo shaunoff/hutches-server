@@ -7,7 +7,6 @@ RUN mkdir -p /home/circleci/app
 WORKDIR /home/circleci/app
 
 # Install app dependencies
-# ARG NPM_TOKEN
 COPY --chown=circleci:circleci .npmrc ./
 COPY --chown=circleci:circleci package.json ./
 COPY --chown=circleci:circleci yarn.lock ./
