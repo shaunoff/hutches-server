@@ -3,21 +3,12 @@ import { loadResolversFiles, loadSchemaFiles } from 'graphql-toolkit'
 
 //Providers
 import { WalletService } from './providers'
-import { RemoteEndpoint } from '@lib/symbols'
 
-export interface WalletModuleConfig {
-  remoteEndpoint: string
-}
-
-export const WalletModule = new GraphQLModule<WalletModuleConfig>({
+export const WalletModule = new GraphQLModule({
   typeDefs: loadSchemaFiles(__dirname + '/schema/'),
   resolvers: loadResolversFiles(__dirname + '/resolvers/'),
-  providers: ({ config: { remoteEndpoint } }) => [
+  providers: () => [
     WalletService,
-    {
-      provide: RemoteEndpoint,
-      useValue: remoteEndpoint,
-    },
     //Another provide/useValue object can be here...
   ],
   context: (session: any) => {
@@ -31,5 +22,4 @@ export const WalletModule = new GraphQLModule<WalletModuleConfig>({
       return {}
     }
   },
-  configRequired: true,
 })
