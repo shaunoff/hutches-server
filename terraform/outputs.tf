@@ -1,7 +1,3 @@
-output "migrate_task_role_arn" {
-  value = "${module.migrate_role.role_arn}"
-}
-
 output "task_role_arn" {
   value = "${module.role.role_arn}"
 }

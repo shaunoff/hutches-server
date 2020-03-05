@@ -7,8 +7,17 @@ config_environment = "staging"
 
 provider_iam_role = "arn:aws:iam::352348888095:role/DeveloperAccess"
 
-service_prefix = "graphql"
+config_service_prefix = "graphql-server"
 
-path_prefix = "/*"
+host_header_match = "graph.stg.pbxx.io"
 
-host_header = "graph.stg.pbxx.io"
+# ---------------------------------------------------------
+# TAGGING
+# ---------------------------------------------------------
+name = "graphql-server"
+
+stack = "graphql"
+
+team = "ui"
+
+squad = "blue-barracudas"
