@@ -62,7 +62,7 @@ commands:
         type: string
     steps:
       - run: |
-        npx apollo service:check --endpoint=<< parameters.endpoint >>
+          npx apollo service:check --endpoint=<< parameters.endpoint >>
 
 jobs:
   prepare:
