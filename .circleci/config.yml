@@ -54,7 +54,15 @@ commands:
         type: string
     steps:
       - run: |
-          apollo service:push --endpoint=<< parameters.endpoint >>
+          npx apollo service:push --endpoint=<< parameters.endpoint >>
+
+  graph_check:
+    parameters:
+      endpoint:
+        type: string
+    steps:
+      - run: |
+        npx apollo service:check --endpoint=<< parameters.endpoint >>
 
 jobs:
   prepare:
@@ -93,7 +101,7 @@ jobs:
           role_arn: ${DEV_ECS_DEPLOY_ROLE_ARN}
           config_repo: deploy-config-dev
           config_dir: graphql-server
-  graph_push_dev:
+  graph_check_dev:
     executor: docker_git
     steps:
       - attach_workspace:
@@ -110,7 +118,7 @@ jobs:
           role_arn: ${STG_ECS_DEPLOY_ROLE_ARN}
           config_repo: deploy-config-stg
           config_dir: graphql-server
-  graph_push_stg:
+  graph_check_stg:
     executor: docker_git
     steps:
       - attach_workspace:
@@ -127,7 +135,7 @@ jobs:
           role_arn: ${PROD_ECS_DEPLOY_ROLE_ARN}
           config_repo: deploy-config-prod
           config_dir: graphql-server
-  graph_push_prod:
+  graph_check_prod:
     executor: docker_git
     steps:
       - attach_workspace:
@@ -154,7 +162,7 @@ workflows:
           context: 'dockerhub'
           requires:
             - docker_build_and_push
-      - graph_push_dev:
+      - graph_check_dev:
           requires:
             - deploy_dev
       - approve_deploy_stg:
@@ -165,7 +173,7 @@ workflows:
           context: 'dockerhub'
           requires:
             - approve_deploy_stg
-      - graph_push_stg:
+      - graph_check_stg:
           requires:
             - deploy_stg
       - approve_deploy_prod:
@@ -176,6 +184,6 @@ workflows:
           context: 'dockerhub'
           requires:
             - approve_deploy_prod
-      - graph_push_prod:
+      - graph_check_prod:
           requires:
             - deploy_prod
