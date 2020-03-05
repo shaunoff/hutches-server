@@ -48,6 +48,14 @@ commands:
 
           /go-ecs-deploy -task temp_task.json -service temp_service.json -type << parameters.type >> -cluster << parameters.cluster >> -roleArn << parameters.role_arn >> -roleSessionName circleci-<< parameters.cluster >>-deploy -roleExternalID ecs-<< parameters.cluster >>-deploy -count 120
 
+  graph_push:
+    parameters:
+      endpoint:
+        type: string
+    steps:
+      - run: |
+          apollo service:push --endpoint=<< parameters.endpoint >>
+
 jobs:
   prepare:
     executor: docker_git
@@ -85,6 +93,13 @@ jobs:
           role_arn: ${DEV_ECS_DEPLOY_ROLE_ARN}
           config_repo: deploy-config-dev
           config_dir: graphql-server
+  graph_push_dev:
+    executor: docker_git
+    steps:
+      - attach_workspace:
+          at: /root
+      - graph_push:
+          endpoint: https://graph.dev.pbxx.io
   deploy_stg:
     executor: ecs-deploy
     steps:
@@ -95,6 +110,13 @@ jobs:
           role_arn: ${STG_ECS_DEPLOY_ROLE_ARN}
           config_repo: deploy-config-stg
           config_dir: graphql-server
+  graph_push_stg:
+    executor: docker_git
+    steps:
+      - attach_workspace:
+          at: /root
+      - graph_push:
+          endpoint: https://graph.stg.pbxx.io
   deploy_prod:
     executor: ecs-deploy
     steps:
@@ -105,6 +127,13 @@ jobs:
           role_arn: ${PROD_ECS_DEPLOY_ROLE_ARN}
           config_repo: deploy-config-prod
           config_dir: graphql-server
+  graph_push_prod:
+    executor: docker_git
+    steps:
+      - attach_workspace:
+          at: /root
+      - graph_push:
+          endpoint: https://graph.promoboxx.com
 
 workflows:
   version: 2
@@ -125,6 +154,9 @@ workflows:
           context: 'dockerhub'
           requires:
             - docker_build_and_push
+      - graph_push_dev:
+          requires:
+            - deploy_dev
       - approve_deploy_stg:
           type: approval
           requires:
@@ -133,6 +165,9 @@ workflows:
           context: 'dockerhub'
           requires:
             - approve_deploy_stg
+      - graph_push_stg:
+          requires:
+            - deploy_stg
       - approve_deploy_prod:
           type: approval
           requires:
@@ -141,3 +176,6 @@ workflows:
           context: 'dockerhub'
           requires:
             - approve_deploy_prod
+      - graph_push_prod:
+          requires:
+            - deploy_prod
