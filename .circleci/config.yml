@@ -85,9 +85,30 @@ jobs:
           role_arn: ${DEV_ECS_DEPLOY_ROLE_ARN}
           config_repo: deploy-config-dev
           config_dir: graphql-server
+  deploy_stg:
+    executor: ecs-deploy
+    steps:
+      - attach_workspace:
+          at: /root
+      - deploy:
+          cluster: stg
+          role_arn: ${STG_ECS_DEPLOY_ROLE_ARN}
+          config_repo: deploy-config-stg
+          config_dir: graphql-server
+  deploy_prod:
+    executor: ecs-deploy
+    steps:
+      - attach_workspace:
+          at: /root
+      - deploy:
+          cluster: prod
+          role_arn: ${PROD_ECS_DEPLOY_ROLE_ARN}
+          config_repo: deploy-config-prod
+          config_dir: graphql-server
 
 workflows:
   version: 2
+
   deploy:
     jobs:
       - prepare:
@@ -97,18 +118,26 @@ workflows:
               only: terraform-setup
               # only: master
       - docker_build_and_push:
-          filters:
-            branches:
-              only: terraform-setup
-              # only: master
           context: 'dockerhub'
           requires:
             - prepare
       - deploy_dev:
-          filters:
-            branches:
-              only: terraform-setup
-              # only: master
           context: 'dockerhub'
           requires:
             - docker_build_and_push
+      - approve_deploy_stg:
+          type: approval
+          requires:
+            - deploy_dev
+      - deploy_stg:
+          context: 'dockerhub'
+          requires:
+            - approve_deploy_stg
+      - approve_deploy_prod:
+          type: approval
+          requires:
+            - deploy_stg
+      - deploy_prod:
+          context: 'dockerhub'
+          requires:
+            - approve_deploy_prod
