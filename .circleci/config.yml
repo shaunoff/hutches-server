@@ -96,7 +96,7 @@ jobs:
     executor: docker_git
     steps:
       - attach_workspace:
-          at: /root
+          at: .
       - setup_remote_docker:
           docker_layer_caching: true
       - run: |
@@ -111,7 +111,7 @@ jobs:
     executor: ecs-deploy
     steps:
       - attach_workspace:
-          at: /root
+          at: .
       - deploy:
           cluster: dev
           role_arn: ${DEV_ECS_DEPLOY_ROLE_ARN}
@@ -128,7 +128,7 @@ jobs:
     executor: ecs-deploy
     steps:
       - attach_workspace:
-          at: /root
+          at: .
       - deploy:
           cluster: stg
           role_arn: ${STG_ECS_DEPLOY_ROLE_ARN}
@@ -138,14 +138,14 @@ jobs:
     executor: node-executor
     steps:
       - attach_workspace:
-          at: /root
+          at: .
       - graph_push:
           endpoint: https://graph.stg.pbxx.io
   deploy_prod:
     executor: ecs-deploy
     steps:
       - attach_workspace:
-          at: /root
+          at: .
       - deploy:
           cluster: prod
           role_arn: ${PROD_ECS_DEPLOY_ROLE_ARN}
@@ -155,7 +155,7 @@ jobs:
     executor: node-executor
     steps:
       - attach_workspace:
-          at: /root
+          at: .
       - graph_push:
           endpoint: https://graph.promoboxx.com
 
