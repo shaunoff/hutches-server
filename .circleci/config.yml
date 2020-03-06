@@ -92,7 +92,7 @@ jobs:
           root: .
           paths:
             - .
-            - ~/.ssh
+            - .ssh
   docker_build_and_push:
     executor: docker_git
     steps:
