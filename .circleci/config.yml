@@ -85,10 +85,6 @@ commands:
 
 jobs:
   prepare:
-    parameters:
-      environment:
-        type: enum
-        enum: ['development', 'staging', 'production']
     executor: node-executor
     steps:
       - checkout
