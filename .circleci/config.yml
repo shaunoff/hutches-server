@@ -36,6 +36,7 @@ commands:
         type: string
         default: 'task.json'
     steps:
+      - checkout
       - run: |
           git clone git@github.com:promoboxx/<< parameters.config_repo >>.git
           export AWS_REGION="us-east-1"
@@ -92,7 +93,6 @@ jobs:
           root: .
           paths:
             - .
-            - .ssh
   docker_build_and_push:
     executor: docker_git
     steps:
