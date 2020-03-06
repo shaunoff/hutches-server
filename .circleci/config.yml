@@ -123,7 +123,7 @@ jobs:
     steps:
       - attach_workspace:
           at: .
-      - graph_push:
+      - graph_check:
           endpoint: https://graph.dev.pbxx.io
   deploy_stg:
     executor: ecs-deploy
@@ -140,7 +140,7 @@ jobs:
     steps:
       - attach_workspace:
           at: .
-      - graph_push:
+      - graph_check:
           endpoint: https://graph.stg.pbxx.io
   deploy_prod:
     executor: ecs-deploy
@@ -157,7 +157,7 @@ jobs:
     steps:
       - attach_workspace:
           at: .
-      - graph_push:
+      - graph_check:
           endpoint: https://graph.promoboxx.com
 
 workflows:
