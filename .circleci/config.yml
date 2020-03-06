@@ -131,11 +131,10 @@ jobs:
           export AWS_REGION="us-east-1"
           export AWS_DEFAULT_REGION="us-east-1"
           aws ssm get-parameters --names /<< parameters.environment >>/graphql-server/ENGINE_API_KEY --with-decryption | jq -r '.Parameters[0].Value' | cat <(echo -n '// .env\nENGINE_API_KEY=') -  > .env
-
       - persist_to_workspace:
-        root: .
-        paths:
-          - .
+          root: .
+          paths:
+            - .
 
   graph_check:
     parameters:
