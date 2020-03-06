@@ -97,6 +97,7 @@ jobs:
           root: .
           paths:
             - .
+
   docker_build_and_push:
     executor: docker_git
     steps:
@@ -187,19 +188,19 @@ workflows:
             branches:
               only: terraform-setup
               # only: master
-      - docker_build_and_push:
-          context: 'dockerhub'
-          requires:
-            - prepare
-      - deploy_dev:
-          context: 'dockerhub'
-          requires:
-            - docker_build_and_push
+      # - docker_build_and_push:
+      #     context: 'dockerhub'
+      #     requires:
+      #       - prepare
+      # - deploy_dev:
+      #     context: 'dockerhub'
+      #     requires:
+      #       - docker_build_and_push
       - generate_apollo_env_file:
           environment: development
           requires:
-            - deploy_dev
-      - graph_check_dev:
+            - prepare
+      - graph_check:
           endpoint: https://graph.dev.pbxx.io
           requires:
             - generate_apollo_env_file
@@ -211,9 +212,6 @@ workflows:
           context: 'dockerhub'
           requires:
             - approve_deploy_stg
-      - graph_check_stg:
-          requires:
-            - deploy_stg
       - approve_deploy_prod:
           type: approval
           requires:
@@ -222,6 +220,3 @@ workflows:
           context: 'dockerhub'
           requires:
             - approve_deploy_prod
-      - graph_check_prod:
-          requires:
-            - deploy_prod
