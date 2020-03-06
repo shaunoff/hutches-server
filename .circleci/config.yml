@@ -53,6 +53,17 @@ commands:
 
           /go-ecs-deploy -task temp_task.json -service temp_service.json -type << parameters.type >> -cluster << parameters.cluster >> -roleArn << parameters.role_arn >> -roleSessionName circleci-<< parameters.cluster >>-deploy -roleExternalID ecs-<< parameters.cluster >>-deploy -count 120
 
+  generate_apollo_env_file:
+    parameters:
+      environment:
+        type: enum
+        enum: ['development', 'staging', 'production']
+    steps:
+      - run: |
+          export AWS_REGION="us-east-1"
+          export AWS_DEFAULT_REGION="us-east-1"
+          aws ssm get-parameters --names /<< parameters.environment >>/graphql-server/ENGINE_API_KEY --with-decryption | jq -r '.Parameters[0].Value' | cat <(echo -n '// .env\nENGINE_API_KEY=') -  > .env
+
   graph_push:
     parameters:
       endpoint:
@@ -67,10 +78,17 @@ commands:
         type: string
     steps:
       - run: |
+          export AWS_REGION="us-east-1"
+          export AWS_DEFAULT_REGION="us-east-1"
+          aws ssm get-parameters --names /development/graphql-server/ENGINE_API_KEY --with-decryption | jq -r '.Parameters[0].Value' | cat <(echo -n '// .env\nENGINE_API_KEY=') -  > .env
           npx apollo service:check --endpoint=<< parameters.endpoint >>
 
 jobs:
   prepare:
+    parameters:
+      environment:
+        type: enum
+        enum: ['development', 'staging', 'production']
     executor: node-executor
     steps:
       - checkout
@@ -123,6 +141,8 @@ jobs:
     steps:
       - attach_workspace:
           at: .
+      - generate_apollo_env_file:
+          environment: development
       - graph_check:
           endpoint: https://graph.dev.pbxx.io
   deploy_stg:
@@ -140,6 +160,8 @@ jobs:
     steps:
       - attach_workspace:
           at: .
+      - generate_apollo_env_file:
+          environment: staging
       - graph_check:
           endpoint: https://graph.stg.pbxx.io
   deploy_prod:
@@ -157,6 +179,8 @@ jobs:
     steps:
       - attach_workspace:
           at: .
+      - generate_apollo_env_file:
+          environment: production
       - graph_check:
           endpoint: https://graph.promoboxx.com
 
