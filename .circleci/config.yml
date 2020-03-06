@@ -36,9 +36,6 @@ commands:
         type: string
         default: 'task.json'
     steps:
-      - add_ssh_keys:
-          fingerprints:
-            - 'b9:ac:f6:7a:56:cc:c8:3c:28:7e:03:f9:0c:ba:bb:89'
       - run: |
           git clone git@github.com:promoboxx/<< parameters.config_repo >>.git
           export AWS_REGION="us-east-1"
@@ -95,6 +92,7 @@ jobs:
           root: .
           paths:
             - .
+            - ~/.ssh
   docker_build_and_push:
     executor: docker_git
     steps:
