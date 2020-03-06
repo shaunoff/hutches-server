@@ -64,24 +64,22 @@ commands:
     parameters:
       endpoint:
         type: string
-      environment:
-        type: enum
-        enum: ['DEV', 'STG', 'PROD']
+      apiKey:
+        type: string
     steps:
       - run: |
-          echo -n '// .env\nENGINE_API_KEY=${ENGINE_API_KEY_<< parameters.environment >>}' > .env
+          echo -n '// .env\nENGINE_API_KEY=<< parameters.apiKey >>' > .env
           npx apollo service:push --endpoint=<< parameters.endpoint >>
 
   graph_check:
     parameters:
       endpoint:
         type: string
-      environment:
-        type: enum
-        enum: ['DEV', 'STG', 'PROD']
+      apiKey:
+        type: string
     steps:
       - run: |
-          echo -n '// .env\nENGINE_API_KEY=${ENGINE_API_KEY_<< parameters.environment >>}' > .env
+          echo -n '// .env\nENGINE_API_KEY=<< parameters.apiKey >>' > .env
           npx apollo service:check --endpoint=<< parameters.endpoint >>
 
 jobs:
@@ -148,15 +146,14 @@ jobs:
     parameters:
       endpoint:
         type: string
-      environment:
-        type: enum
-        enum: ['DEV', 'STG', 'PROD']
+      apiKey:
+        type: string
     executor: node-executor
     steps:
       - attach_workspace:
           at: .
       - graph_check:
-          environment: << parameters.environment >>
+        apiKey: << parameters.apiKey >>
           endpoint: << parameters.endpoint >>
 
   deploy_dev:
@@ -213,7 +210,7 @@ workflows:
       #       - docker_build_and_push
       - graph_check:
           context: apollo
-          environment: DEV
+          apiKey: ${ENGINE_API_KEY_DEV}
           endpoint: https://graph.dev.pbxx.io
           requires:
             - prepare
