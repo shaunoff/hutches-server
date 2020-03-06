@@ -5,7 +5,7 @@ executors:
     docker:
       - image: docker:stable-git
   node-executor:
-    working_directory: /root
+    working_directory: ~/repo
     docker:
       - image: circleci/node:12.14-browsers
   ecs-deploy:
@@ -76,6 +76,19 @@ jobs:
       - run:
           name: Setup NPM registry authentication
           command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > .npmrc
+      - restore_cache:
+          name: Restore Yarn Package Cache
+          keys:
+            - yarn-packages-{{ checksum "yarn.lock" }}
+      - run:
+          name: Yarn install
+          command: yarn install --no-progress
+      - save_cache:
+          name: Save Yarn Package Cache
+          key: yarn-packages-{{ checksum "yarn.lock" }}
+          paths:
+            - node_modules
+            - ~/.cache/yarn
       - persist_to_workspace:
           root: /root
           paths:
@@ -109,7 +122,7 @@ jobs:
     executor: node-executor
     steps:
       - attach_workspace:
-          at: /root
+          at: .
       - graph_push:
           endpoint: https://graph.dev.pbxx.io
   deploy_stg:
