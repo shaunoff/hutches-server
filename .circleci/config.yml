@@ -15,6 +15,10 @@ executors:
         auth:
           username: $DOCKER_LOGIN
           password: $DOCKER_PASSWORD
+  python-executor:
+    working_directory: ~/repo
+    docker:
+      - image: circleci/python:2.7-stretch
 
 commands:
   deploy:
@@ -53,17 +57,6 @@ commands:
 
           /go-ecs-deploy -task temp_task.json -service temp_service.json -type << parameters.type >> -cluster << parameters.cluster >> -roleArn << parameters.role_arn >> -roleSessionName circleci-<< parameters.cluster >>-deploy -roleExternalID ecs-<< parameters.cluster >>-deploy -count 120
 
-  generate_apollo_env_file:
-    parameters:
-      environment:
-        type: enum
-        enum: ['development', 'staging', 'production']
-    steps:
-      - run: |
-          export AWS_REGION="us-east-1"
-          export AWS_DEFAULT_REGION="us-east-1"
-          aws ssm get-parameters --names /<< parameters.environment >>/graphql-server/ENGINE_API_KEY --with-decryption | jq -r '.Parameters[0].Value' | cat <(echo -n '// .env\nENGINE_API_KEY=') -  > .env
-
   graph_push:
     parameters:
       endpoint:
@@ -78,9 +71,6 @@ commands:
         type: string
     steps:
       - run: |
-          export AWS_REGION="us-east-1"
-          export AWS_DEFAULT_REGION="us-east-1"
-          aws ssm get-parameters --names /development/graphql-server/ENGINE_API_KEY --with-decryption | jq -r '.Parameters[0].Value' | cat <(echo -n '// .env\nENGINE_API_KEY=') -  > .env
           npx apollo service:check --endpoint=<< parameters.endpoint >>
 
 jobs:
@@ -122,6 +112,37 @@ jobs:
 
           docker push pbxx/${CIRCLE_PROJECT_REPONAME}:${CIRCLE_SHA1}
           docker push pbxx/${CIRCLE_PROJECT_REPONAME}:${CIRCLE_BRANCH}-latest
+
+  generate_apollo_env_file:
+    parameters:
+      environment:
+        type: enum
+        enum: ['development', 'staging', 'production']
+    executor: python-executor
+    steps:
+      - attach_workspace:
+          at: .
+      - aws-cli/install
+      - run: |
+          export AWS_REGION="us-east-1"
+          export AWS_DEFAULT_REGION="us-east-1"
+          aws ssm get-parameters --names /<< parameters.environment >>/graphql-server/ENGINE_API_KEY --with-decryption | jq -r '.Parameters[0].Value' | cat <(echo -n '// .env\nENGINE_API_KEY=') -  > .env
+      - persist_to_workspace:
+        root: .
+        paths:
+          - .
+
+  graph_check:
+    parameters:
+      endpoint:
+        type: string
+    executor: node-executor
+    steps:
+      - attach_workspace:
+          at: .
+      - graph_check:
+          endpoint: << parameters.endpoint >>
+
   deploy_dev:
     executor: ecs-deploy
     steps:
@@ -132,15 +153,7 @@ jobs:
           role_arn: ${DEV_ECS_DEPLOY_ROLE_ARN}
           config_repo: deploy-config-dev
           config_dir: graphql-server
-  graph_check_dev:
-    executor: node-executor
-    steps:
-      - attach_workspace:
-          at: .
-      - generate_apollo_env_file:
-          environment: development
-      - graph_check:
-          endpoint: https://graph.dev.pbxx.io
+
   deploy_stg:
     executor: ecs-deploy
     steps:
@@ -151,15 +164,7 @@ jobs:
           role_arn: ${STG_ECS_DEPLOY_ROLE_ARN}
           config_repo: deploy-config-stg
           config_dir: graphql-server
-  graph_check_stg:
-    executor: node-executor
-    steps:
-      - attach_workspace:
-          at: .
-      - generate_apollo_env_file:
-          environment: staging
-      - graph_check:
-          endpoint: https://graph.stg.pbxx.io
+
   deploy_prod:
     executor: ecs-deploy
     steps:
@@ -170,15 +175,6 @@ jobs:
           role_arn: ${PROD_ECS_DEPLOY_ROLE_ARN}
           config_repo: deploy-config-prod
           config_dir: graphql-server
-  graph_check_prod:
-    executor: node-executor
-    steps:
-      - attach_workspace:
-          at: .
-      - generate_apollo_env_file:
-          environment: production
-      - graph_check:
-          endpoint: https://graph.promoboxx.com
 
 workflows:
   version: 2
@@ -199,9 +195,14 @@ workflows:
           context: 'dockerhub'
           requires:
             - docker_build_and_push
-      - graph_check_dev:
+      - generate_apollo_env_file:
+          environment: development
           requires:
             - deploy_dev
+      - graph_check_dev:
+          endpoint: https://graph.dev.pbxx.io
+          requires:
+            - generate_apollo_env_file
       - approve_deploy_stg:
           type: approval
           requires:
