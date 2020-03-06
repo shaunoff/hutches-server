@@ -200,6 +200,7 @@ workflows:
       #     requires:
       #       - docker_build_and_push
       - generate_apollo_env_file:
+          context: 'spa'
           environment: development
           requires:
             - prepare
