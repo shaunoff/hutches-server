@@ -70,7 +70,7 @@ commands:
 
 jobs:
   prepare:
-    executor: docker_git
+    executor: node-executor
     steps:
       - checkout
       - run:
