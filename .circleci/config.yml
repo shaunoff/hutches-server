@@ -207,19 +207,19 @@ workflows:
           endpoint: https://graph.dev.pbxx.io
           requires:
             - generate_apollo_env_file
-      - approve_deploy_stg:
-          type: approval
-          requires:
-            - deploy_dev
-      - deploy_stg:
-          context: 'dockerhub'
-          requires:
-            - approve_deploy_stg
-      - approve_deploy_prod:
-          type: approval
-          requires:
-            - deploy_stg
-      - deploy_prod:
-          context: 'dockerhub'
-          requires:
-            - approve_deploy_prod
+      # - approve_deploy_stg:
+      #     type: approval
+      #     requires:
+      #       - deploy_dev
+      # - deploy_stg:
+      #     context: 'dockerhub'
+      #     requires:
+      #       - approve_deploy_stg
+      # - approve_deploy_prod:
+      #     type: approval
+      #     requires:
+      #       - deploy_stg
+      # - deploy_prod:
+      #     context: 'dockerhub'
+      #     requires:
+      #       - approve_deploy_prod
