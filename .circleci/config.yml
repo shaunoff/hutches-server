@@ -142,19 +142,14 @@ jobs:
           paths:
             - .
 
-  graph_check:
-    parameters:
-      endpoint:
-        type: string
-      apiKey:
-        type: string
+  graph_check_dev:
     executor: node-executor
     steps:
       - attach_workspace:
           at: .
       - graph_check:
-          apiKey: << parameters.apiKey >>
-          endpoint: << parameters.endpoint >>
+          apiKey: ${ENGINE_API_KEY_DEV}
+          endpoint: https://graph.dev.pbxx.io
 
   deploy_dev:
     executor: ecs-deploy
@@ -208,10 +203,8 @@ workflows:
       #     context: 'dockerhub'
       #     requires:
       #       - docker_build_and_push
-      - graph_check:
+      - graph_check_dev:
           context: apollo
-          apiKey: ${ENGINE_API_KEY_DEV}
-          endpoint: https://graph.dev.pbxx.io
           requires:
             - prepare
       # - approve_deploy_stg:
