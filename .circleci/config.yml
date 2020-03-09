@@ -59,28 +59,26 @@ commands:
           echo "------------------------------------------------------------------------------------------"
 
           /go-ecs-deploy -task temp_task.json -service temp_service.json -type << parameters.type >> -cluster << parameters.cluster >> -roleArn << parameters.role_arn >> -roleSessionName circleci-<< parameters.cluster >>-deploy -roleExternalID ecs-<< parameters.cluster >>-deploy -count 120
-
-  graph_check:
-    parameters:
-      endpoint:
-        type: string
-      apiKey:
-        type: string
-    steps:
-      - run: |
-          echo -en "// .env\nENGINE_API_KEY=<< parameters.apiKey >>" > .env
-          npx apollo service:check --endpoint=<< parameters.endpoint >>
-
-  graph_push:
-    parameters:
-      endpoint:
-        type: string
-      apiKey:
-        type: string
-    steps:
-      - run: |
-          echo -en "// .env\nENGINE_API_KEY=<< parameters.apiKey >>" > .env
-          npx apollo service:push --endpoint=<< parameters.endpoint >>
+  # graph_check:
+  #   parameters:
+  #     endpoint:
+  #       type: string
+  #     apiKey:
+  #       type: string
+  #   steps:
+  #     - run: |
+  #         echo -en "// .env\nENGINE_API_KEY=<< parameters.apiKey >>" > .env
+  #         npx apollo service:check --endpoint=<< parameters.endpoint >>
+  # graph_push:
+  #   parameters:
+  #     endpoint:
+  #       type: string
+  #     apiKey:
+  #       type: string
+  #   steps:
+  #     - run: |
+  #         echo -en "// .env\nENGINE_API_KEY=<< parameters.apiKey >>" > .env
+  #         npx apollo service:push --endpoint=<< parameters.endpoint >>
 
 jobs:
   prepare:
@@ -123,14 +121,14 @@ jobs:
           docker push pbxx/${CIRCLE_PROJECT_REPONAME}:${CIRCLE_SHA1}
           docker push pbxx/${CIRCLE_PROJECT_REPONAME}:${CIRCLE_BRANCH}-latest
 
-  graph_check_dev:
-    executor: node-executor
-    steps:
-      - attach_workspace:
-          at: .
-      - graph_check:
-          apiKey: ${ENGINE_API_KEY_DEV}
-          endpoint: https://graph.dev.pbxx.io
+  # graph_check_dev:
+  #   executor: node-executor
+  #   steps:
+  #     - attach_workspace:
+  #         at: .
+  #     - graph_check:
+  #         apiKey: ${ENGINE_API_KEY_DEV}
+  #         endpoint: https://graph.dev.pbxx.io
 
   deploy_dev:
     executor: ecs-deploy
@@ -176,31 +174,27 @@ workflows:
             branches:
               only: terraform-setup
               # only: master
-      # - docker_build_and_push:
-      #     context: 'dockerhub'
-      #     requires:
-      #       - prepare
-      # - deploy_dev:
-      #     context: 'dockerhub'
-      #     requires:
-      #       - docker_build_and_push
-      - graph_check_dev:
-          context: apollo
+      - docker_build_and_push:
+          context: 'dockerhub'
           requires:
             - prepare
-      # - approve_deploy_stg:
-      #     type: approval
-      #     requires:
-      #       - deploy_dev
-      # - deploy_stg:
-      #     context: 'dockerhub'
-      #     requires:
-      #       - approve_deploy_stg
-      # - approve_deploy_prod:
-      #     type: approval
-      #     requires:
-      #       - deploy_stg
-      # - deploy_prod:
-      #     context: 'dockerhub'
-      #     requires:
-      #       - approve_deploy_prod
+      - deploy_dev:
+          context: 'dockerhub'
+          requires:
+            - docker_build_and_push
+      - approve_deploy_stg:
+          type: approval
+          requires:
+            - deploy_dev
+      - deploy_stg:
+          context: 'dockerhub'
+          requires:
+            - approve_deploy_stg
+      - approve_deploy_prod:
+          type: approval
+          requires:
+            - deploy_stg
+      - deploy_prod:
+          context: 'dockerhub'
+          requires:
+            - approve_deploy_prod
