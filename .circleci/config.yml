@@ -68,7 +68,7 @@ commands:
         type: string
     steps:
       - run: |
-          echo -en '// .env\nENGINE_API_KEY=<< parameters.apiKey >>' > .env
+          echo -en "// .env\nENGINE_API_KEY=<< parameters.apiKey >>" > .env
           npx apollo service:check --endpoint=<< parameters.endpoint >>
 
   graph_push:
@@ -79,7 +79,7 @@ commands:
         type: string
     steps:
       - run: |
-          echo -en '// .env\nENGINE_API_KEY=<< parameters.apiKey >>' > .env
+          echo -en "// .env\nENGINE_API_KEY=<< parameters.apiKey >>" > .env
           npx apollo service:push --endpoint=<< parameters.endpoint >>
 
 jobs:
