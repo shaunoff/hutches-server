@@ -60,17 +60,6 @@ commands:
 
           /go-ecs-deploy -task temp_task.json -service temp_service.json -type << parameters.type >> -cluster << parameters.cluster >> -roleArn << parameters.role_arn >> -roleSessionName circleci-<< parameters.cluster >>-deploy -roleExternalID ecs-<< parameters.cluster >>-deploy -count 120
 
-  graph_push:
-    parameters:
-      endpoint:
-        type: string
-      apiKey:
-        type: string
-    steps:
-      - run: |
-          echo -n '// .env\nENGINE_API_KEY=<< parameters.apiKey >>' > .env
-          npx apollo service:push --endpoint=<< parameters.endpoint >>
-
   graph_check:
     parameters:
       endpoint:
@@ -79,8 +68,19 @@ commands:
         type: string
     steps:
       - run: |
-          echo -n '// .env\nENGINE_API_KEY=<< parameters.apiKey >>' > .env
+          echo -en '// .env\nENGINE_API_KEY=<< parameters.apiKey >>' > .env
           npx apollo service:check --endpoint=<< parameters.endpoint >>
+
+  graph_push:
+    parameters:
+      endpoint:
+        type: string
+      apiKey:
+        type: string
+    steps:
+      - run: |
+          echo -en '// .env\nENGINE_API_KEY=<< parameters.apiKey >>' > .env
+          npx apollo service:push --endpoint=<< parameters.endpoint >>
 
 jobs:
   prepare:
@@ -122,25 +122,6 @@ jobs:
 
           docker push pbxx/${CIRCLE_PROJECT_REPONAME}:${CIRCLE_SHA1}
           docker push pbxx/${CIRCLE_PROJECT_REPONAME}:${CIRCLE_BRANCH}-latest
-
-  generate_apollo_env_file:
-    parameters:
-      environment:
-        type: enum
-        enum: ['development', 'staging', 'production']
-    executor: python-executor
-    steps:
-      - attach_workspace:
-          at: .
-      - aws-cli/install
-      - run: |
-          export AWS_REGION="us-east-1"
-          export AWS_DEFAULT_REGION="us-east-1"
-          aws ssm get-parameters --names /<< parameters.environment >>/graphql-server/ENGINE_API_KEY --with-decryption | jq -r '.Parameters[0].Value' | cat <(echo -n '// .env\nENGINE_API_KEY=') -  > .env
-      - persist_to_workspace:
-          root: .
-          paths:
-            - .
 
   graph_check_dev:
     executor: node-executor
