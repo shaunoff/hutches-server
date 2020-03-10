@@ -15,3 +15,6 @@ lambda-build
 .terraform
 terraform.tfstate.d
 .npmrc
+.env.development
+.env.staging
+.env.production
