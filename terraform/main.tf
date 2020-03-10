@@ -48,13 +48,8 @@ data "terraform_remote_state" "cluster" {
 locals {
   common_tags = {
     "environment" = "${var.environment}"
-    "stack"       = "${var.service_prefix}-server"
-    "team"        = "ui"
-    "squad"       = "blue-barracudas"
+    "stack"       = "${var.stack}"
+    "team"        = "${var.team}"
+    "squad"       = "${var.squad}"
   }
-}
-
-data "aws_route53_zone" "internal" {
-  name         = "${var.environment}.internal"
-  private_zone = true
 }

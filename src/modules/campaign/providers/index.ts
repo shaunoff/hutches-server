@@ -2,15 +2,15 @@ import { RESTDataSource, RequestOptions } from 'apollo-datasource-rest'
 import { Injectable, ProviderScope, Inject } from '@graphql-modules/di'
 import { CampaignSearchParams, CampaignsParams } from '@models'
 import formatQueryParams from '@lib/formatQueryParams'
-import { RemoteEndpoint } from '@lib/symbols'
+import AppConfig from '@config/AppConfig'
 
 @Injectable({
   scope: ProviderScope.Session,
 })
 export class CampaignAPI extends RESTDataSource {
-  constructor(@Inject(RemoteEndpoint) private remoteEndpoint: string) {
+  constructor() {
     super()
-    this.baseURL = this.remoteEndpoint
+    this.baseURL = AppConfig.LEGACY_API_HOST
   }
 
   willSendRequest(request: RequestOptions) {

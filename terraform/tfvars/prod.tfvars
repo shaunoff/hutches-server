@@ -7,8 +7,17 @@ config_environment = "production"
 
 provider_iam_role = "arn:aws:iam::743984659321:role/DeveloperAccess"
 
-service_prefix = "graphql"
+config_service_prefix = "graphql-server"
 
-path_prefix = "/*"
+host_header_match = "graph.promoboxx.com"
 
-host_header = "graph.promoboxx.com"
+# ---------------------------------------------------------
+# TAGGING
+# ---------------------------------------------------------
+name = "graphql-server"
+
+stack = "graphql"
+
+team = "ui"
+
+squad = "blue-barracudas"

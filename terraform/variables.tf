@@ -1,33 +1,57 @@
+# ---------------------------------------------------------
+# Environment
+# ---------------------------------------------------------
 variable "environment" {
-  type        = "string"
-  description = "name of the environment to deploy to"
-}
-
-variable "config_environment" {
-  type        = "string"
-  description = "the name of the parameter store environment to use"
+  description = "the environment to manage (dev, stg, prd)"
 }
 
 variable "provider_iam_role" {
-  type        = "string"
   description = "the IAM role to assume when running AWS provider actions."
 }
 
-variable "service_prefix" {
+# ---------------------------------------------------------
+# IAM
+# ---------------------------------------------------------
+variable "config_environment" {
   type        = "string"
-  description = "the prefix name of this service (aka 'ad-service' would be 'ad')"
+  description = "the name of the parameter store environment prefix to use"
 }
 
-variable "path_prefix" {
+variable "config_service_prefix" {
   type        = "string"
-  description = "The path prefix to match incoming requests to this service in the ALB, combined with host_header"
+  description = "the name of the parameter store service prefix to use"
 }
 
-variable "host_header" {
+# ---------------------------------------------------------
+# ALB
+# ---------------------------------------------------------
+variable "host_header_match" {
   type        = "string"
-  description = "The host header to match incoming requests to this service in the ALB, combined with path_prefix"
+  description = "host header to match on for ALB routing"
 }
 
+# ---------------------------------------------------------
+# TAGGING
+# ---------------------------------------------------------
+variable "name" {
+  type = "string"
+}
+
+variable "stack" {
+  type = "string"
+}
+
+variable "team" {
+  type = "string"
+}
+
+variable "squad" {
+  type = "string"
+}
+
+# ---------------------------------------------------------
+# HEALTH CHECK
+# ---------------------------------------------------------
 variable "health_check_endpoint" {
   type        = "string"
   description = "endpoint to hit for service health check"

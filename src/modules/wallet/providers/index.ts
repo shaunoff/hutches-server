@@ -2,15 +2,15 @@ import { RESTDataSource, RequestOptions } from 'apollo-datasource-rest'
 import { Inject, Injectable, ProviderScope } from '@graphql-modules/di'
 import { WalletsParams, AddFundsParams } from '@models'
 import formatQueryParams from '@lib/formatQueryParams'
-import { RemoteEndpoint } from '@lib/symbols'
+import AppConfig from '@config/AppConfig'
 
 @Injectable({
   scope: ProviderScope.Session,
 })
 export class WalletService extends RESTDataSource {
-  constructor(@Inject(RemoteEndpoint) private remoteEndpoint: string) {
+  constructor() {
     super()
-    this.baseURL = this.remoteEndpoint
+    this.baseURL = AppConfig.SERVICE_API_HOST
   }
 
   willSendRequest(request: RequestOptions) {

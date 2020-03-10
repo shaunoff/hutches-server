@@ -49,7 +49,8 @@
     "paths": {
       "@models": ["generated/graphql"],
       "@modules/*": ["modules/*"],
-      "@lib/*": ["lib/*"]
+      "@lib/*": ["lib/*"],
+      "@config/*": ["config/*"]
     },
     "moduleResolution": "node",
     "baseUrl": "./src",

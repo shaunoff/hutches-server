@@ -1,9 +1,16 @@
 version: 2.1
 
+orbs:
+  aws-cli: circleci/aws-cli@0.1.4
+
 executors:
   docker_git:
     docker:
       - image: docker:stable-git
+  node-executor:
+    working_directory: ~/repo
+    docker:
+      - image: circleci/node:12.14-browsers
   ecs-deploy:
     resource_class: small
     docker:
@@ -11,6 +18,10 @@ executors:
         auth:
           username: $DOCKER_LOGIN
           password: $DOCKER_PASSWORD
+  python-executor:
+    working_directory: ~/repo
+    docker:
+      - image: circleci/python:2.7-stretch
 
 commands:
   deploy:
@@ -32,6 +43,7 @@ commands:
         type: string
         default: 'task.json'
     steps:
+      - checkout
       - run: |
           git clone git@github.com:promoboxx/<< parameters.config_repo >>.git
           export AWS_REGION="us-east-1"
@@ -47,24 +59,57 @@ commands:
           echo "------------------------------------------------------------------------------------------"
 
           /go-ecs-deploy -task temp_task.json -service temp_service.json -type << parameters.type >> -cluster << parameters.cluster >> -roleArn << parameters.role_arn >> -roleSessionName circleci-<< parameters.cluster >>-deploy -roleExternalID ecs-<< parameters.cluster >>-deploy -count 120
+  # graph_check:
+  #   parameters:
+  #     endpoint:
+  #       type: string
+  #     apiKey:
+  #       type: string
+  #   steps:
+  #     - run: |
+  #         echo -en "// .env\nENGINE_API_KEY=<< parameters.apiKey >>" > .env
+  #         npx apollo service:check --endpoint=<< parameters.endpoint >>
+  # graph_push:
+  #   parameters:
+  #     endpoint:
+  #       type: string
+  #     apiKey:
+  #       type: string
+  #   steps:
+  #     - run: |
+  #         echo -en "// .env\nENGINE_API_KEY=<< parameters.apiKey >>" > .env
+  #         npx apollo service:push --endpoint=<< parameters.endpoint >>
 
 jobs:
   prepare:
-    executor: docker_git
+    executor: node-executor
     steps:
       - checkout
       - run:
           name: Setup NPM registry authentication
           command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > .npmrc
+      - restore_cache:
+          name: Restore Yarn Package Cache
+          keys:
+            - yarn-packages-{{ checksum "yarn.lock" }}
+      - run:
+          name: Yarn install
+          command: yarn install --no-progress
+      - save_cache:
+          name: Save Yarn Package Cache
+          key: yarn-packages-{{ checksum "yarn.lock" }}
+          paths:
+            - ~/.cache/yarn
       - persist_to_workspace:
-          root: /root
+          root: .
           paths:
             - .
+
   docker_build_and_push:
     executor: docker_git
     steps:
       - attach_workspace:
-          at: /root
+          at: .
       - setup_remote_docker:
           docker_layer_caching: true
       - run: |
@@ -75,19 +120,52 @@ jobs:
 
           docker push pbxx/${CIRCLE_PROJECT_REPONAME}:${CIRCLE_SHA1}
           docker push pbxx/${CIRCLE_PROJECT_REPONAME}:${CIRCLE_BRANCH}-latest
+
+  # graph_check_dev:
+  #   executor: node-executor
+  #   steps:
+  #     - attach_workspace:
+  #         at: .
+  #     - graph_check:
+  #         apiKey: ${ENGINE_API_KEY_DEV}
+  #         endpoint: https://graph.dev.pbxx.io
+
   deploy_dev:
     executor: ecs-deploy
     steps:
       - attach_workspace:
-          at: /root
+          at: .
       - deploy:
           cluster: dev
           role_arn: ${DEV_ECS_DEPLOY_ROLE_ARN}
           config_repo: deploy-config-dev
           config_dir: graphql-server
 
+  deploy_stg:
+    executor: ecs-deploy
+    steps:
+      - attach_workspace:
+          at: .
+      - deploy:
+          cluster: stg
+          role_arn: ${STG_ECS_DEPLOY_ROLE_ARN}
+          config_repo: deploy-config-stg
+          config_dir: graphql-server
+
+  deploy_prod:
+    executor: ecs-deploy
+    steps:
+      - attach_workspace:
+          at: .
+      - deploy:
+          cluster: prod
+          role_arn: ${PROD_ECS_DEPLOY_ROLE_ARN}
+          config_repo: deploy-config-prod
+          config_dir: graphql-server
+
 workflows:
   version: 2
+
   deploy:
     jobs:
       - prepare:
@@ -95,19 +173,27 @@ workflows:
           filters:
             branches:
               only: master
-
-  testing:
-    jobs:
-      - prepare:
-          context: spa
       - docker_build_and_push:
           context: 'dockerhub'
           requires:
             - prepare
-  # - deploy_dev:
-  #     filters:
-  #       branches:
-  #         only: master
-  #     context: 'dockerhub'
-  #     requires:
-  #       - docker_build_and_push
+      - deploy_dev:
+          context: 'dockerhub'
+          requires:
+            - docker_build_and_push
+      - approve_deploy_stg:
+          type: approval
+          requires:
+            - deploy_dev
+      - deploy_stg:
+          context: 'dockerhub'
+          requires:
+            - approve_deploy_stg
+      - approve_deploy_prod:
+          type: approval
+          requires:
+            - deploy_stg
+      - deploy_prod:
+          context: 'dockerhub'
+          requires:
+            - approve_deploy_prod

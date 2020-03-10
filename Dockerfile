@@ -16,8 +16,16 @@ RUN rm -f .npmrc
 # Bundle app source
 COPY --chown=circleci:circleci . .
 
+# These are ENV variables the app cares about. In general we always want NODE_ENV to be production
+ENV NODE_ENV="production"
+ENV ENGINE_API_KEY=""
+ENV LEGACY_API_HOST=""
+ENV SERVICE_API_HOST=""
+ENV TRACING=""
+ENV DEBUG=""
+
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:4000/version || exit 1
+  CMD curl -f http://localhost:4000/.well-known/apollo/server-health || exit 1
 
 EXPOSE 4000
 CMD [ "yarn", "start" ]
