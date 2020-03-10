@@ -172,8 +172,7 @@ workflows:
           context: spa
           filters:
             branches:
-              only: terraform-setup
-              # only: master
+              only: master
       - docker_build_and_push:
           context: 'dockerhub'
           requires:
