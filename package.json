@@ -2,7 +2,6 @@
   "dependencies": {
     "@graphql-modules/core": "^0.7.14",
     "@graphql-modules/di": "^0.7.14",
-    "@promoboxx/eslint-config": "^1.0.2",
     "@types/bcryptjs": "^2.4.2",
     "@types/jsonwebtoken": "^8.3.9",
     "@types/node-fetch": "^2.5.4",
