@@ -1,7 +1,0 @@
-input WalletsParams {
-  brand_id: String
-}
-
-type Query {
-  getWallets(params: WalletsParams): Wallets
-}

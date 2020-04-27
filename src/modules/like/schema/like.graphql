@@ -1,0 +1,11 @@
+type ILike {
+	id: String
+	asset: Asset
+	user: User
+	assetId: String!
+	userId: String!
+}
+
+extend type Asset {
+	likes: [ILike]
+}

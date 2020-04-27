@@ -1,0 +1,9 @@
+input CommentData {
+  comment: String!
+  assetId: String!
+  userId: String!
+}
+
+type Mutation {
+  addComment(data: CommentData): IComment
+}

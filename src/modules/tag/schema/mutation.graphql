@@ -1,0 +1,8 @@
+input TagData {
+  assetId: String!
+  userId: String!
+}
+
+type Mutation {
+  addTag(data: TagData): ITag
+}

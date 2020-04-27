@@ -1,0 +1,28 @@
+input NewAssetData {
+  name: String!
+  userId: String!
+  url: String!
+  fileName: String!
+  added: String!
+}
+
+input UpdateAssetData {
+  id: String!
+  name: String!
+  userId: String!
+  url: String!
+  fileName: String!
+  added: String!
+}
+
+type Mutation {
+  addAsset(data: NewAssetData!): Asset!
+}
+
+type Mutation {
+  updateAsset(data: UpdateAssetData!): Asset!
+}
+
+type Mutation {
+  deleteAsset(id: String!): AssetId
+}

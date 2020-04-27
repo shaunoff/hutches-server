@@ -1,0 +1,12 @@
+type IComment {
+	id: String
+	comment: String!
+	asset: Asset
+	user: User
+	assetId: String!
+	userId: String!
+}
+
+extend type Asset {
+	comments: [IComment]
+}

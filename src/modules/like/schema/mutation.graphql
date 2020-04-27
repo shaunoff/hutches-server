@@ -1,0 +1,8 @@
+input LikeData {
+  assetId: String!
+  userId: String!
+}
+
+type Mutation {
+  addLike(data: LikeData): ILike
+}

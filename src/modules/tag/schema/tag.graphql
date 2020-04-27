@@ -1,0 +1,11 @@
+type ITag {
+	id: String
+	asset: Asset
+	user: User
+	assetId: String!
+	userId: String!
+}
+
+extend type Asset {
+	tags: [ITag]
+}

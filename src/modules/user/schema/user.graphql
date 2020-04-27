@@ -1,0 +1,21 @@
+"dhsgfjhsdgfjhsdgf dfsdfjhsdgfhjdsgfg vfdfsdf dsfsdf sdjhfgsjdhgfjsdgfjhgsdjhfgjshdg jfgsdhgfjh"
+type User {
+  """
+  Description for field
+  Supports **multi-line** description for your [API](http://example.com)!
+  """
+  id: ID!
+  isAdmin: Boolean
+  createdAt: String @formatDate
+  password: String
+  email: String @tag @deprecated(reason: "jdfghfjhgjkfdhgkjhdfkjhgjkdfh")
+  firstName: String
+  lastName: String
+  avatar: String
+  # assets: [Asset]
+}
+
+type AuthResponse {
+  token: String
+  user: User
+}

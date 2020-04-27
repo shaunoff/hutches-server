@@ -1,0 +1,3 @@
+type Query {
+  getLikes: [ILike]
+}
